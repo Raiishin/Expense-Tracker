@@ -1,3 +1,7 @@
+# Expense-Tracker
+A web application that tracks your expenses and suggests improvements
+
+
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
 ## Available Scripts
