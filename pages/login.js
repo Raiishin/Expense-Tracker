@@ -1,14 +1,16 @@
-import TopBar from "../components/TopBar";
+import TopBar from "../components/topBar";
 import checkUser from "../backend/index";
 import { useRouter } from "next/router";
 import { useForm } from "react-hook-form";
+import errorMessages from "../components/messages/error";
+import React, { useEffect } from "react";
 
 const styling = {
 	display: "flex",
 	justifyContent: "center",
 	alignItems: "center",
 	textAlign: "center",
-	minHeight: "100vh",
+	minHeight: "300px",
 };
 
 const box = {
@@ -19,33 +21,61 @@ const box = {
 	margin: "0",
 };
 
+const errorMessage = {
+	width: "70%",
+	height: "80px",
+	color: "black",
+	justifyContent: "center",
+	alignItems: "center",
+	display: "flex",
+	marginTop: "100px",
+};
+
 const Login = () => {
+	const router = useRouter();
+	const { message } = router.query;
+	console.log(message);
+
+	useEffect(() => {
+		const errorMessage = document.getElementById("errorMessage");
+		if (message) {
+			errorMessage.innerHTML = errorMessages.loginFailed;
+			errorMessage.style.backgroundColor = "pink";
+		} else {
+			errorMessage.innerHTML = "";
+			errorMessage.style.backgroundColor = "white";
+		}
+
+		document.getElementById("form").reset();
+	}, []);
+
 	const {
 		handleSubmit,
 		formState: { errors },
 	} = useForm();
 
-	const router = useRouter();
 	const redirect = (location) => {
 		router.push(location);
 	};
 
 	const userLogin = async () => {
-		const username = document.getElementById("username").value;
-		const password = document.getElementById("password").value;
+		const userId = await checkUser(username.value, password.value);
 
-		const isUserValid = await checkUser(username, password);
-
-		if (isUserValid === true) redirect("/login/success");
-		else redirect("/login/failed");
+		if (userId !== null) redirect(`/?user=${userId}`);
+		else redirect("/login?message=failed");
 	};
 
 	return (
 		<div>
 			<TopBar />
+			<div style={{ "text-align": "-webkit-center" }}>
+				<div style={errorMessage}>
+					<text id="errorMessage"></text>
+				</div>
+			</div>
 			<div style={styling}>
 				<div style={box}>
-					<form onSubmit={handleSubmit(userLogin)}>
+					<form onSubmit={handleSubmit(userLogin)} id="form">
 						<div style={{ margin: "10px" }}>
 							Username: <input id="username" type="text"></input>
 						</div>

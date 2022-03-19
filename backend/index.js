@@ -28,24 +28,22 @@ const checkUser = async (username, password) => {
 	const usersSnapshot = await getDocs(users);
 	const usersData = usersSnapshot.docs.map((doc) => doc.data());
 
-	console.log(usersData);
-
 	// Query users
 	console.log("query");
 	const q = query(users, where("username", "==", username), where("password", "==", password));
 	const search = await getDocs(q);
-	console.log(search._docs.length);
 
-	if (search._docs.length <= 0) return false;
+	if (search._docs.length <= 0) return null;
 
+	let userId;
 	search.forEach((item) => {
-		console.log(item.data());
+		const { id } = item.data();
+		userId = id;
 	});
-	return true;
 
+	return userId;
 	// Get wallets
 	// const wallets = collection(db, "wallets");
 };
-// checkUser("test_username", "test_password");
 
 export default checkUser;
