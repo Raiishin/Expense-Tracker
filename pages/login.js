@@ -1,4 +1,7 @@
 import TopBar from "../components/TopBar";
+import checkUser from "../backend/index";
+import { useRouter } from "next/router";
+import { useForm } from "react-hook-form";
 
 const styling = {
 	display: "flex",
@@ -17,12 +20,24 @@ const box = {
 };
 
 const Login = () => {
-	const userLogin = async () => {
-		const username = document.getElementById("username");
-		const password = document.getElementById("password");
+	const {
+		handleSubmit,
+		formState: { errors },
+	} = useForm();
 
-		console.log(username, password);
-		return username;
+	const router = useRouter();
+	const redirect = (location) => {
+		router.push(location);
+	};
+
+	const userLogin = async () => {
+		const username = document.getElementById("username").value;
+		const password = document.getElementById("password").value;
+
+		const isUserValid = await checkUser(username, password);
+
+		if (isUserValid === true) redirect("/login/success");
+		else redirect("/login/failed");
 	};
 
 	return (
@@ -30,7 +45,7 @@ const Login = () => {
 			<TopBar />
 			<div style={styling}>
 				<div style={box}>
-					<form onSubmit={(e) => userLogin()}>
+					<form onSubmit={handleSubmit(userLogin)}>
 						<div style={{ margin: "10px" }}>
 							Username: <input id="username" type="text"></input>
 						</div>
