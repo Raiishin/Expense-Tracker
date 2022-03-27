@@ -5,11 +5,12 @@ import {
 	collection,
 	getDocs,
 	setDoc,
+	addDoc,
 	doc,
 	query,
 	where,
 } from "firebase/firestore/lite";
-import config from "../config/index.js";
+import config from "../../config/index.js";
 
 // Initialize Firebase
 const app = initializeApp(config.firebaseConfig);
@@ -23,33 +24,42 @@ const index = async (req, res) => {
 };
 
 const view = async (req, res) => {
-	const { username, password } = req.query;
-	const q = query(users, where("username", "==", username), where("password", "==", password));
+	const { username, password, email } = req.query;
+	const q = query(
+		users,
+		where("username", "==", username),
+		where("password", "==", password),
+		where("email", "==", email)
+	);
 	const search = await getDocs(q);
 
 	// Error handling if there are no results
 	if (search._docs.length == []) return res.json({ message: "No such user" });
-	else {
-		let userId;
+	else
 		search.forEach((item) => {
-			const { id } = item.data();
-			userId = id;
+			return res.json({ id: item.id });
 		});
-		return res.json({ userId });
-	}
 };
 
 const create = async (req, res) => {
-	const resp = await setDoc(doc(users), {
-		firstName: req.firstName,
-		lastName: req.lastName,
-		username: req.username,
-		password: req.password,
-		email: req.email,
+	const { firstName, lastName, username, password, email } = req.query;
+
+	// Validate if user already exists using email
+	const q = query(users, where("email", "==", email));
+	const search = await getDocs(q);
+
+	if (search._docs.length !== []) return res.json({ message: "This email already exists" });
+
+	// Create new user
+	const resp = await addDoc(users, {
+		firstName: firstName,
+		lastName: lastName,
+		username: username,
+		password: password,
+		email: email,
 	});
 
-	console.log(resp);
-	return res.json({ resp });
+	return res.json({ id: resp.id });
 };
 
 export default {
