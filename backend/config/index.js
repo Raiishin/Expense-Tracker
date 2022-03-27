@@ -1,5 +1,5 @@
 // Config File
-const config = {
+export default {
 	firebaseConfig: {
 		apiKey: "",
 		authDomain: "",
@@ -10,5 +10,3 @@ const config = {
 		measurementId: "",
 	},
 };
-
-export default config;
