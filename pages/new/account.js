@@ -2,17 +2,20 @@ import TopBar from "../../components/topBar";
 import { useForm } from "react-hook-form";
 import { useRouter } from "next/router";
 import { redirect } from "../../helpers";
+import User from "../../backend/controllers/user";
 
 const createNewAccount = () => {
-	const createAccount = () => {
-		const firstName = document.getElementById("firstName");
-		const lastName = document.getElementById("lastName");
-		const password = document.getElementById("password");
-		const password2 = document.getElementById("password2");
-		const email = document.getElementById("email");
+	const nameRegex = /^[a-zA-Z]+$/i;
+	const emailRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)$/i;
+	const router = useRouter();
 
-		const nameRegex = /^[a-zA-Z]+$/g;
-		const emailRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)$/;
+	const createAccount = () => {
+		const firstName = document.getElementById("firstName").value;
+		const lastName = document.getElementById("lastName").value;
+		const username = document.getElementById("username").value;
+		const password = document.getElementById("password").value;
+		const password2 = document.getElementById("password2").value;
+		const email = document.getElementById("email").value;
 
 		// Field Validation
 		if (!nameRegex.test(firstName)) {
@@ -25,6 +28,15 @@ const createNewAccount = () => {
 			alert("Please enter a valid email address");
 		} else {
 			// API Call
+			const request = {
+				firstName: firstName,
+				lastName: lastName,
+				username: username,
+				password: password,
+				email: email,
+			};
+			const user = new User(request);
+			const isAccountCreated = user.createNewUser(request);
 			// On Success -> Redirect to "/" with user Id
 			if (isAccountCreated == true) redirect(router, `/?user=${userId}`);
 			else redirect(router, "/new/account?message=failed");
