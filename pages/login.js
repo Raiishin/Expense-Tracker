@@ -4,6 +4,7 @@ import { useRouter } from "next/router";
 import { useForm } from "react-hook-form";
 import errorMessages from "../components/messages/error";
 import React, { useEffect } from "react";
+import { redirect } from "../helpers";
 
 const styling = {
 	display: "flex",
@@ -54,15 +55,11 @@ const Login = () => {
 		formState: { errors },
 	} = useForm();
 
-	const redirect = (location) => {
-		router.push(location);
-	};
-
 	const userLogin = async () => {
 		const userId = await checkUser(username.value, password.value);
 
-		if (userId !== null) redirect(`/?user=${userId}`);
-		else redirect("/login?message=failed");
+		if (userId !== null) redirect(router, `/?user=${userId}`);
+		else redirect(router, "/login?message=failed");
 	};
 
 	return (
