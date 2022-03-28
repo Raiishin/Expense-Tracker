@@ -1,16 +1,7 @@
 // User Controller
 import { initializeApp } from "firebase/app";
-import {
-	getFirestore,
-	collection,
-	getDocs,
-	setDoc,
-	addDoc,
-	doc,
-	query,
-	where,
-} from "firebase/firestore/lite";
-import config from "../../config/index.js";
+import { getFirestore, collection, getDocs, addDoc, query, where } from "firebase/firestore/lite";
+import config from "../config/index.js";
 
 // Initialize Firebase
 const app = initializeApp(config.firebaseConfig);
@@ -23,43 +14,51 @@ const index = async (req, res) => {
 	return res.json({ usersData });
 };
 
-const view = async (req, res) => {
-	const { username, password, email } = req.query;
-	const q = query(
-		users,
-		where("username", "==", username),
-		where("password", "==", password),
-		where("email", "==", email)
-	);
-	const search = await getDocs(q);
+const view = async (req, res, next) => {
+	try {
+		const { username, password, email } = req.query;
+		const q = query(
+			users,
+			where("username", "==", username),
+			where("password", "==", password),
+			where("email", "==", email)
+		);
+		const search = await getDocs(q);
 
-	// Error handling if there are no results
-	if (search._docs.length == []) return res.json({ message: "No such user" });
-	else
-		search.forEach((item) => {
-			return res.json({ id: item.id });
-		});
+		// Error handling if there are no results
+		if (search._docs.length !== 0) return res.json({ message: "No such user" });
+		else
+			search.forEach((item) => {
+				return res.json({ id: item.id });
+			});
+	} catch (err) {
+		next(err);
+	}
 };
 
-const create = async (req, res) => {
-	const { firstName, lastName, username, password, email } = req.query;
+const create = async (req, res, next) => {
+	try {
+		const { firstName, lastName, username, password, email } = req.query;
 
-	// Validate if user already exists using email
-	const q = query(users, where("email", "==", email));
-	const search = await getDocs(q);
+		// Validate if user already exists using email
+		const q = query(users, where("email", "==", email));
+		const search = await getDocs(q);
 
-	if (search._docs.length !== []) return res.json({ message: "This email already exists" });
+		if (search._docs.length !== 0) return res.json({ message: "This email already exists" });
 
-	// Create new user
-	const resp = await addDoc(users, {
-		firstName: firstName,
-		lastName: lastName,
-		username: username,
-		password: password,
-		email: email,
-	});
+		// Create new user
+		const resp = await addDoc(users, {
+			first_name: firstName,
+			last_name: lastName,
+			username: username,
+			password: password,
+			email: email,
+		});
 
-	return res.json({ id: resp.id });
+		return res.json({ id: resp.id });
+	} catch (err) {
+		next(err);
+	}
 };
 
 export default {
