@@ -17,18 +17,18 @@ const index = async (req, res) => {
 const view = async (req, res, next) => {
 	try {
 		const { username, password, email } = req.query;
-		const q = query(
+		const searchQuery = query(
 			users,
 			where("username", "==", username),
 			where("password", "==", password),
 			where("email", "==", email)
 		);
-		const search = await getDocs(q);
+		const usersData = await getDocs(searchQuery);
 
 		// Error handling if there are no results
-		if (search._docs.length !== 0) return res.json({ message: "No such user" });
+		if (usersData.docs.length == 0) return res.json({ message: "No such user" });
 		else
-			search.forEach((item) => {
+			usersData.forEach((item) => {
 				return res.json({ id: item.id });
 			});
 	} catch (err) {
@@ -41,10 +41,10 @@ const create = async (req, res, next) => {
 		const { firstName, lastName, username, password, email } = req.query;
 
 		// Validate if user already exists using email
-		const q = query(users, where("email", "==", email));
-		const search = await getDocs(q);
+		const searchQuery = query(users, where("email", "==", email));
+		const usersData = await getDocs(searchQuery);
 
-		if (search._docs.length !== 0) return res.json({ message: "This email already exists" });
+		if (usersData.docs.length !== 0) return res.json({ message: "This email already exists" });
 
 		// Create new user
 		const resp = await addDoc(users, {

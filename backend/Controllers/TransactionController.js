@@ -11,8 +11,8 @@ const transactions = collection(db, "transactions");
 const index = async (req, res, next) => {
 	try {
 		const { user_id } = req.query;
-		const q = query(transactions, where("user_id", "==", user_id));
-		const transactionsSnapshot = await getDocs(q);
+		const searchQuery = query(transactions, where("user_id", "==", user_id));
+		const transactionsSnapshot = await getDocs(searchQuery);
 		const transactionsData = transactionsSnapshot.docs.map((doc) => doc.data());
 		return res.json({ transactionsData });
 	} catch (err) {
@@ -23,12 +23,12 @@ const index = async (req, res, next) => {
 const view = async (req, res, next) => {
 	try {
 		const { user_id, wallet_name } = req.query;
-		const q = query(
+		const searchQuery = query(
 			transactions,
 			where("user_id", "==", user_id),
 			where("wallet_name", "==", wallet_name)
 		);
-		const transactionsSnapshot = await getDocs(q);
+		const transactionsSnapshot = await getDocs(searchQuery);
 		const transactionsData = transactionsSnapshot.docs.map((doc) => doc.data());
 		return res.json({ transactionsData });
 	} catch (err) {
@@ -48,11 +48,10 @@ const create = async (req, res, next) => {
 		);
 		const walletData = await getDocs(walletQuery);
 
-		console.log(walletData._docs);
 		// Error handling if there are no results
-		if (walletData._docs.length == 0) return res.json({ message: "No such wallet" });
+		if (walletData.docs.length == 0) return res.json({ message: "No such wallet" });
 
-		const q = query(
+		const searchQuery = query(
 			transactions,
 			where("description", "==", description),
 			where("date", "==", date),
@@ -60,9 +59,10 @@ const create = async (req, res, next) => {
 			where("user_id", "==", user_id),
 			where("wallet_name", "==", wallet_name)
 		);
-		const search = await getDocs(q);
+		const transactionsData = await getDocs(searchQuery);
 
-		if (search._docs.length !== 0) return res.json({ message: "This transaction already exists" });
+		if (transactionsData.docs.length !== 0)
+			return res.json({ message: "This transaction already exists" });
 
 		// Create new wallet
 		const resp = await addDoc(transactions, {
