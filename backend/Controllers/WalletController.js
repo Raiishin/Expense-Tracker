@@ -10,8 +10,8 @@ const wallets = collection(db, "wallets");
 
 const index = async (req, res, next) => {
 	try {
-		const { id } = req.query;
-		const q = query(wallets, where("id", "==", id));
+		const { user_id } = req.query;
+		const q = query(wallets, where("user_id", "==", user_id));
 		const walletsSnapshot = await getDocs(q);
 		const walletsData = walletsSnapshot.docs.map((doc) => doc.data());
 		return res.json({ walletsData });
@@ -22,8 +22,8 @@ const index = async (req, res, next) => {
 
 const view = async (req, res, next) => {
 	try {
-		const { id, name } = req.query;
-		const q = query(wallets, where("id", "==", id), where("name", "==", name));
+		const { user_id, name } = req.query;
+		const q = query(wallets, where("user_id", "==", user_id), where("name", "==", name));
 		const search = await getDocs(q);
 
 		// Error handling if there are no results
