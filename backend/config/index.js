@@ -9,4 +9,6 @@ export default {
 		appId: "",
 		measurementId: "",
 	},
+	salt: "",
+	iterations: 10000,
 };

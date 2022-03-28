@@ -2,6 +2,7 @@
 import { initializeApp } from "firebase/app";
 import { getFirestore, collection, getDocs, addDoc, query, where } from "firebase/firestore/lite";
 import config from "../config/index.js";
+import { saltPassword } from "../../helpers/index.js";
 
 // Initialize Firebase
 const app = initializeApp(config.firebaseConfig);
@@ -17,10 +18,11 @@ const index = async (req, res) => {
 const view = async (req, res, next) => {
 	try {
 		const { username, password, email } = req.query;
+
 		const searchQuery = query(
 			users,
 			where("username", "==", username),
-			where("password", "==", password),
+			where("password", "==", saltPassword(password)),
 			where("email", "==", email)
 		);
 		const usersData = await getDocs(searchQuery);
@@ -51,7 +53,7 @@ const create = async (req, res, next) => {
 			first_name: firstName,
 			last_name: lastName,
 			username: username,
-			password: password,
+			password: saltPassword(password),
 			email: email,
 		});
 
